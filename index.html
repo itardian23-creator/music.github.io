@@ -76,8 +76,8 @@ footer{border-top:1px solid var(--line);padding:26px 16px calc(40px + env(safe-a
   <button class="ib" id="nx" aria-label="Berikutnya"><svg viewBox="0 0 24 24"><path d="M16 5h2v14h-2zM4 5l11 7L4 19z"/></svg></button>
   <button class="ib" id="rp" aria-pressed="false" aria-label="Ulangi"><svg viewBox="0 0 24 24" id="rpi"><path d="M7 7h10v3l4-4-4-4v3H5v6h2zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2z"/></svg></button>
  </div>
- <div class="vol"><button class="ib" id="mt" aria-label="Bisukan" style="width:32px;height:32px"><svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9zm13.5 3A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4z"/></svg></button><input type="range" id="vl" min="0" max="100" value="70" aria-label="Volume"></div>
-<div class="bs" id="bs"><div class="t"><label for="bv">Bass Boost</label><span id="bn">0%</span></div>
+ <p class="sub" style="font-size:12.5px;color:var(--mut);margin-top:4px">Volume mengikuti tombol volume di perangkatmu</p>
+ <div class="bs" id="bs"><div class="t"><label for="bv">Bass Boost</label><span id="bn">0%</span></div>
   <div class="r"><input type="range" id="bv" min="0" max="100" value="0" aria-label="Bass boost"></div>
   <div class="ps" id="bp"><button class="ch" data-v="0" aria-pressed="true">Mati</button><button class="ch" data-v="35" aria-pressed="false">Sedang</button><button class="ch" data-v="65" aria-pressed="false">Kuat</button><button class="ch" data-v="100" aria-pressed="false">Maksimal</button></div>
   <small id="bm">Pakai headphone/speaker yang bagus. Kalau suara pecah, turunkan bass. Di iPhone, bass diproses dulu beberapa detik setiap ganti lagu atau level.</small></div>
@@ -97,6 +97,11 @@ var LAGU = [
   { judul: "Great", artis: "Lagu Contoh", file: "great.mp3", cover: "" },
   // { judul: "Judul Lagu", artis: "Nama Artis", file: "nama-file.mp3", cover: "" },
 ];
+// Otomatis baca lagu dari repo GitHub (hanya jalan di alamat *.github.io, repo harus publik).
+// Semua file .mp3/.m4a di folder yang sama dengan index.html ikut tampil. Nama file "Artis - Judul.mp3" dibaca jadi artis & judul.
+// Gambar dengan nama sama (mis. "Judul.jpg") jadi sampulnya. Ubah AUTO ke false kalau tidak mau.
+var AUTO = true;
+var GITHUB = { user: "", repo: "", folder: "" }; // kosongkan = ambil otomatis dari alamat situs
 // =======================
 (function(){
 var $=function(s){return document.querySelector(s)},L=LAGU,N=L.length,au=$('#au'),i=0,sh=0,rp=0,hist=[],dur={};
@@ -115,20 +120,22 @@ return new Blob([ab],{type:'audio/wav'})}
 // iOS: realtime Web Audio mematikan lagu saat layar dikunci, jadi bass diproses dulu (offline) lalu diputar sebagai audio biasa.
 function renderSrc(k,play,t0){var id=++rid;busy=1;$('#st').textContent='Memproses bass…';
 fetch(L[k].file).then(function(r){return r.arrayBuffer()}).then(function(ab){return new Promise(function(ok,no){var p=new OC(2,1,44100).decodeAudioData(ab,ok,no);if(p&&p.catch)p.catch(no)})}).then(function(dec){if(id!==rid)return;
-return new Promise(function(ok,no){var o=new OC(2,dec.length,44100),s=o.createBufferSource(),a=o.createBiquadFilter(),b=o.createBiquadFilter(),g=o.createGain(),c=o.createDynamicsCompressor(),f=bass/100;
-s.buffer=dec;a.type='lowshelf';a.frequency.value=140;a.gain.value=f*14;b.type='peaking';b.frequency.value=65;b.Q.value=1;b.gain.value=f*6;g.gain.value=1-f*.3;c.threshold.value=-8;c.knee.value=12;c.ratio.value=4;c.attack.value=.005;c.release.value=.2;
-s.connect(a);a.connect(b);b.connect(g);g.connect(c);c.connect(o.destination);s.start(0);o.oncomplete=function(e){ok(e.renderedBuffer)};var p=o.startRendering();if(p&&p.then)p.then(ok,no)})}).then(function(out){if(!out||id!==rid)return;
+return new Promise(function(ok,no){var o=new OC(2,dec.length,44100),s=o.createBufferSource();s.buffer=dec;chain(o,s,o.destination,bass/100);s.start(0);o.oncomplete=function(e){ok(e.renderedBuffer)};var p=o.startRendering();if(p&&p.then)p.then(ok,no)})}).then(function(out){if(!out||id!==rid)return;
 var u=URL.createObjectURL(wav(out));if(bUrl)URL.revokeObjectURL(bUrl);bUrl=u;au.src=u;
 if(t0){au.addEventListener('loadedmetadata',function f(){au.removeEventListener('loadedmetadata',f);try{au.currentTime=t0}catch(_){}})}
 busy=0;if(play)au.play().catch(function(){$('#st').textContent='Ketuk putar untuk mulai'});else $('#st').textContent='Siap diputar'}).catch(function(){if(id!==rid)return;busy=0;au.src=L[k].file;$('#st').textContent='Bass gagal diproses, memutar tanpa bass';if(play)au.play().catch(function(){})})}
 function iosBass(){clearTimeout(bt);bt=setTimeout(function(){var t=au.currentTime||0,pl=!au.paused;rid++;if(bass>0){au.pause();renderSrc(i,pl,t)}else{busy=0;au.src=L[i].file;if(t)au.addEventListener('loadedmetadata',function f(){au.removeEventListener('loadedmetadata',f);try{au.currentTime=t}catch(_){}});if(pl)au.play().catch(function(){})}},500)}
-function save(){try{localStorage.setItem('stelmusik',JSON.stringify({i:i,sh:sh,rp:rp,v:au.volume,b:bass}))}catch(_){}}
+function save(){try{localStorage.setItem('stelmusik',JSON.stringify({i:i,sh:sh,rp:rp,b:bass}))}catch(_){}}
 // Bass boost (Web Audio). Dibuat hanya saat dipakai supaya pemutaran biasa tetap aman.
 function fxOK(){return!IOS&&(window.AudioContext||window.webkitAudioContext)&&location.protocol!=='file:'}
-function ensureFx(){if(fx)return fx;if(!fxOK())return null;try{var AC=window.AudioContext||window.webkitAudioContext;ctx=new AC();var src=ctx.createMediaElementSource(au),a=ctx.createBiquadFilter(),b=ctx.createBiquadFilter(),g=ctx.createGain(),c=ctx.createDynamicsCompressor();
-a.type='lowshelf';a.frequency.value=140;b.type='peaking';b.frequency.value=65;b.Q.value=1;c.threshold.value=-8;c.knee.value=12;c.ratio.value=4;c.attack.value=.005;c.release.value=.2;
-src.connect(a);a.connect(b);b.connect(g);g.connect(c);c.connect(ctx.destination);fx={a:a,b:b,g:g}}catch(_){fx=null}return fx}
-function applyBass(){var k=bass/100,f=ensureFx();if(!f)return;var t=ctx.currentTime;f.a.gain.setTargetAtTime(k*14,t,.05);f.b.gain.setTargetAtTime(k*6,t,.05);f.g.gain.setTargetAtTime(1-k*.3,t,.05)}
+function chain(c,src,dest,f){var lo=c.createBiquadFilter(),pk=c.createBiquadFilter(),g=c.createGain(),cp=c.createDynamicsCompressor(),lp=c.createBiquadFilter(),ws=c.createWaveShaper(),hp=c.createBiquadFilter(),hg=c.createGain(),cu=new Float32Array(1024),q;
+for(q=0;q<1024;q++)cu[q]=Math.tanh((q/511.5-1)*4);
+lo.type='lowshelf';lo.frequency.value=200;pk.type='peaking';pk.frequency.value=90;pk.Q.value=1;cp.threshold.value=-10;cp.knee.value=12;cp.ratio.value=4;cp.attack.value=.005;cp.release.value=.2;
+lp.type='lowpass';lp.frequency.value=150;ws.curve=cu;hp.type='highpass';hp.frequency.value=100;
+lo.gain.value=f*16;pk.gain.value=f*7;g.gain.value=1-f*.35;hg.gain.value=f*.9;
+src.connect(lo);lo.connect(pk);pk.connect(g);src.connect(lp);lp.connect(ws);ws.connect(hp);hp.connect(hg);hg.connect(g);g.connect(cp);cp.connect(dest);return{lo:lo,pk:pk,g:g,hg:hg}}
+function ensureFx(){if(fx)return fx;if(!fxOK())return null;try{var AC=window.AudioContext||window.webkitAudioContext;ctx=new AC();fx=chain(ctx,ctx.createMediaElementSource(au),ctx.destination,0)}catch(_){fx=null}return fx}
+function applyBass(){var k=bass/100,f=ensureFx();if(!f)return;var t=ctx.currentTime;f.lo.gain.setTargetAtTime(k*16,t,.05);f.pk.gain.setTargetAtTime(k*7,t,.05);f.g.gain.setTargetAtTime(1-k*.35,t,.05);f.hg.gain.setTargetAtTime(k*.9,t,.05)}
 function bassUI(){$('#bv').value=bass;$('#bv').style.setProperty('--p',bass+'%');$('#bn').textContent=bass+'%';document.querySelectorAll('#bp .ch').forEach(function(b){b.setAttribute('aria-pressed',+b.dataset.v===bass)})}
 function setBass(v){bass=v;bassUI();if(IOS){save();iosBass();return}if(bass>0||fx){applyBass();if(ctx&&ctx.state!=='running')ctx.resume()}save()}
 function gest(){if(bass>0&&!fx){applyBass()}if(ctx&&ctx.state!=='running')ctx.resume()}
@@ -160,28 +167,30 @@ au.ontimeupdate=prog;au.onloadedmetadata=function(){dur[i]=au.duration;prog();va
 au.onplay=function(){$('#ppi').innerHTML='<path d="M6 5h4v14H6zm8 0h4v14h-4z"/>';$('#pp').setAttribute('aria-label','Jeda');document.body.classList.add('pl-on');$('#st').textContent='Sedang diputar';if('mediaSession'in navigator)navigator.mediaSession.playbackState='playing'};
 au.onpause=function(){$('#ppi').innerHTML='<path d="M8 5v14l11-7z"/>';$('#pp').setAttribute('aria-label','Putar');document.body.classList.remove('pl-on');if(!busy)$('#st').textContent='Dijeda';if('mediaSession'in navigator)navigator.mediaSession.playbackState='paused'};
 au.onended=function(){if(rp===2){au.currentTime=0;au.play()}else if(rp===1||i<N-1||sh)next();else{au.currentTime=0;$('#st').textContent='Selesai'}};
-au.onerror=function(){if(!busy&&au.getAttribute('src'))$('#st').textContent='File lagu tidak ditemukan'};
+au.onerror=function(){if(busy)return;if(bUrl&&au.getAttribute('src')===bUrl){var t=au.currentTime||0;bass=0;bassUI();save();au.src=L[i].file;$('#st').textContent='Perangkat ini gagal memutar bass, kembali ke suara asli';au.play().catch(function(){});return}if(au.getAttribute('src'))$('#st').textContent='File lagu tidak ditemukan'};
 $('#sk').oninput=function(){if(au.duration)au.currentTime=this.value/1000*au.duration;this.style.setProperty('--p',(this.value/10)+'%')};
 $('#pp').onclick=toggle;$('#nx').onclick=next;$('#pv').onclick=prev;
 $('#sh').onclick=function(){sh=sh?0:1;this.setAttribute('aria-pressed',!!sh);save()};
 function rpUI(){var b=$('#rp');b.setAttribute('aria-pressed',rp>0);b.setAttribute('aria-label',['Ulangi: mati','Ulangi semua','Ulangi satu lagu'][rp]);$('#rpi').innerHTML=RP[rp===2?1:0]}
 $('#rp').onclick=function(){rp=(rp+1)%3;rpUI();save()};
-$('#vl').oninput=function(){au.volume=this.value/100;au.muted=false;this.style.setProperty('--p',this.value+'%');save()};
-$('#mt').onclick=function(){au.muted=!au.muted;this.style.color=au.muted?'var(--ac)':''};
 addEventListener('keydown',function(e){if(/INPUT|TEXTAREA/.test(e.target.tagName)&&e.target.type!=='range')return;
 if(e.code==='Space'&&e.target.tagName!=='BUTTON'){e.preventDefault();toggle()}
-else if(e.key==='ArrowRight'){e.shiftKey?next():au.currentTime+=5}else if(e.key==='ArrowLeft'){e.shiftKey?prev():au.currentTime-=5}else if(e.key==='m'||e.key==='M')$('#mt').click()});
+else if(e.key==='ArrowRight'){e.shiftKey?next():au.currentTime+=5}else if(e.key==='ArrowLeft'){e.shiftKey?prev():au.currentTime-=5}});
 if('mediaSession'in navigator){[['seekforward',function(){au.currentTime+=10}],['seekbackward',function(){au.currentTime-=10}],['play',toggle],['pause',toggle],['previoustrack',prev],['nexttrack',next]].forEach(function(a){try{navigator.mediaSession.setActionHandler(a[0],a[1])}catch(_){}})}
 var sx=0,sw=0;cv.addEventListener('pointerdown',function(e){sx=e.clientX;sw=0});cv.addEventListener('pointerup',function(e){var d=e.clientX-sx;if(Math.abs(d)>50){sw=1;d<0?next():prev()}});cv.addEventListener('click',function(e){if(sw){e.stopPropagation();e.preventDefault();sw=0}},true);
 $('#cnt').textContent=N+' lagu';
 if(!bassOK()){$('#bv').disabled=true;document.querySelectorAll('#bp .ch').forEach(function(b){b.disabled=true});$('#bm').textContent=location.protocol==='file:'?'Bass boost aktif setelah dibuka lewat github.io (bukan dari file lokal).':'Browser ini tidak mendukung bass boost.'}
-$('#bv').oninput=function(){setBass(+this.value)};
+if($('#bv'))$('#bv').oninput=function(){setBass(+this.value)};
 document.querySelectorAll('#bp .ch').forEach(function(b){b.onclick=function(){setBass(+b.dataset.v)}});
 bassUI();
 sh=S.sh?1:0;rp=S.rp||0;$('#sh').setAttribute('aria-pressed',!!sh);rpUI();
-// iOS tidak mengizinkan volume diatur lewat web: sembunyikan slider
-au.volume=.5;var noVol=Math.abs(au.volume-.5)>.01;au.volume=1;
-if(noVol)$('.vol').hidden=true;else{au.volume=S.v!=null?S.v:.7;$('#vl').value=au.volume*100;$('#vl').style.setProperty('--p',au.volume*100+'%')}
 list();if(N)load(S.i<N?S.i||0:0,false);else{$('#jd').textContent='Belum ada lagu';$('#ar').textContent='Isi daftar LAGU di index.html'}
+function addSongs(a){if(!a.length)return;var had=N;a.forEach(function(l){L.push(l);var k=L.length-1,d=cover(l);d.onclick=function(){k===i?toggle():load(k,true)};cv.appendChild(d);cds.push(d)});N=L.length;$('#cnt').textContent=N+' lagu';list($('#q').value);if(!had)load(0,false);else place()}
+function ghInfo(){var m=location.hostname.match(/^(.+)\.github\.io$/);if(!m)return null;var u=GITHUB.user||m[1],seg=location.pathname.split('/').filter(Boolean),root=!GITHUB.repo&&(!seg.length||/\.html?$/.test(seg[0])),repo=GITHUB.repo||(root?u+'.github.io':seg[0]),rest=seg.slice(root?0:1);if(rest.length&&/\./.test(rest[rest.length-1]))rest.pop();return{u:u,r:repo,f:(GITHUB.folder!==''?GITHUB.folder.replace(/^\/|\/$/g,''):rest.join('/'))}}
+function parse(files){var A=/\.(mp3|m4a|aac|wav)$/i,I=/\.(jpe?g|png|webp)$/i,img={},have={};L.forEach(function(l){have[decodeURIComponent(l.file).split('/').pop().toLowerCase()]=1});
+files.forEach(function(f){if(f.type==='file'&&I.test(f.name))img[f.name.replace(I,'').toLowerCase()]=f.name});
+return files.filter(function(f){return f.type==='file'&&A.test(f.name)&&!have[f.name.toLowerCase()]}).map(function(f){var b=f.name.replace(A,''),n=b.replace(/_/g,' '),p=n.split(' - '),c=img[b.toLowerCase()];return{judul:(p.length>1?p.slice(1).join(' - '):n).trim(),artis:p.length>1?p[0].trim():'Tanpa artis',file:encodeURI(f.name),cover:c?encodeURI(c):''}})}
+if(AUTO){var g=ghInfo();if(g){var K='stelmusik_gh',url='https://api.github.com/repos/'+g.u+'/'+g.r+'/contents/'+g.f,c=null;try{c=JSON.parse(sessionStorage.getItem(K)||'null')}catch(_){}
+if(c&&c.u===url&&Date.now()-c.t<12e4)addSongs(parse(c.d));else fetch(url).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){try{sessionStorage.setItem(K,JSON.stringify({u:url,t:Date.now(),d:d}))}catch(_){}addSongs(parse(d))}).catch(function(){if(c&&c.u===url)addSongs(parse(c.d))})}}
 })();
 </script></body></html>
