@@ -1,8 +1,9 @@
 <!doctype html>
 <html lang="id"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Ardian"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="color-scheme" content="dark"><meta name="theme-color" content="#0a0a0a">
-<title>Stel Musik</title>
+<title>Ardian</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -57,12 +58,13 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .eq{display:none;gap:2px;height:14px;align-items:flex-end;justify-content:center}.eq s{width:3px;background:var(--ac);border-radius:2px;animation:eq .9s ease-in-out infinite}.eq s:nth-child(2){animation-delay:.2s}.eq s:nth-child(3){animation-delay:.4s}
 @keyframes eq{0%,100%{height:3px}50%{height:14px}}
 body.pl-on .it.on .n{display:none}body.pl-on .it.on .eq{display:flex}
+.pg{height:5px;border-radius:9px;background:var(--panel2);overflow:hidden;margin-top:10px}.pg i{display:block;height:100%;width:0;background:var(--ac);transition:width .3s}.ch:disabled{opacity:.5}.it.nf{opacity:.4}.it .d{white-space:nowrap}
 .kosong{color:var(--mut);text-align:center;padding:30px 0}
 footer{border-top:1px solid var(--line);padding:26px 16px calc(40px + env(safe-area-inset-bottom,0px));text-align:center;font-size:13px;color:#777}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition:none!important}}
 </style></head>
 <body>
-<header class="nav"><div class="w"><span class="logo">Stel<span>Musik</span></span><span class="pill" id="cnt">0 lagu</span></div></header>
+<header class="nav"><div class="w"><span class="logo">Ardian</span><span class="pill" id="cnt">0 lagu</span></div></header>
 <main>
 <section class="hero"><div class="w">
  <span class="tag" id="st">Siap diputar</span>
@@ -81,20 +83,31 @@ footer{border-top:1px solid var(--line);padding:26px 16px calc(40px + env(safe-a
   <div class="r"><input type="range" id="bv" min="0" max="100" value="0" aria-label="Bass boost"></div>
   <div class="ps" id="bp"><button class="ch" data-v="0" aria-pressed="true">Mati</button><button class="ch" data-v="35" aria-pressed="false">Sedang</button><button class="ch" data-v="65" aria-pressed="false">Kuat</button><button class="ch" data-v="100" aria-pressed="false">Maksimal</button></div>
   <small id="bm">Pakai headphone/speaker yang bagus. Kalau suara pecah, turunkan bass. Di iPhone, bass diproses dulu beberapa detik setiap ganti lagu atau level.</small></div>
+ <div class="bs" id="of"><div class="t"><label>Mode Offline</label><span id="on">0/0</span></div>
+  <div class="ps"><button class="ch" id="oa">Simpan semua lagu</button><button class="ch" id="od">Hapus unduhan</button></div>
+  <div class="pg"><i id="op"></i></div>
+  <small id="om">Simpan lagu ke HP supaya bisa diputar tanpa internet.</small></div>
 </div></section>
 <section><div class="w">
  <div class="hd"><span class="tag">Daftar Putar</span><input id="q" type="search" placeholder="Cari judul atau artis…" aria-label="Cari lagu"></div>
  <div class="pl" id="pl"></div>
 </div></section>
 </main>
-<footer>StelMusik · Spasi: putar/jeda · ← → : maju/mundur 5 dtk · Shift + ← →: lagu sebelumnya/berikutnya</footer>
+<footer>Ardian · Spasi: putar/jeda · ← → : maju/mundur 5 dtk · Shift + ← →: lagu sebelumnya/berikutnya</footer>
 <audio id="au" preload="metadata"></audio>
 <script>
 // ===== DAFTAR LAGU =====
 // Tambah lagu: taruh file mp3 di folder yang sama dengan index.html, lalu tambah satu baris di bawah.
 // cover (opsional): nama file gambar di folder yang sama, mis. "great.jpg". Kosong = cover otomatis.
 var LAGU = [
-  { judul: "Great", artis: "Lagu Contoh", file: "great.mp3", cover: "" },
+  { judul: "Astaga Bercanda", artis: "Akbar Chalay & Mingse", file: "akbar-chalay-mingse-astaga-bercanda-visualizer-128-ytshorts.savetube.me.mp3", cover: "" },
+  { judul: "What If I Call (Merry Christmas, I Miss You)", artis: "Alex Crichton", file: "alex-crichton-what-if-i-call-merry-christmas-i-miss-you-lyrics-128-ytshorts.savetube.me.mp3", cover: "" },
+  { judul: "Raindance", artis: "Dave ft. Tems", file: "dave-raindance-ft-tems-128-ytshorts.savetube.me.mp3", cover: "" },
+  { judul: "DJ Kaka Pu Manis Bikin Sa Suka (DJ Curi Curi Pandang Slow)", artis: "Maman Fvndy", file: "dj-kaka-pu-manis-bikin-sa-suka-dj-curi-curi-pandang-slow-viral-tiktok-full-song-maman-fvndy-2026-128-ytshorts.savetube.me.mp3", cover: "" },
+  { judul: "Everything U Are", artis: "Hindia", file: "hindia-everything-u-are-128-ytshorts.savetube.me.mp3", cover: "" },
+  { judul: "Membasuh", artis: "Hindia ft. Rara Sekar", file: "hindia-ft-rara-sekar-membasuh-official-lyric-commentary-video-128-ytshorts.savetube.me.mp3", cover: "" },
+  { judul: "Nona Kaka Sayang", artis: "Iki Dano", file: "iki-dano-nona-kaka-sayang-official-music-video-128-ytshorts.savetube.me.mp3", cover: "" },
+  { judul: "Angin", artis: "Negoro", file: "negoro-angin-128-ytshorts.savetube.me.mp3", cover: "" },
   // { judul: "Judul Lagu", artis: "Nama Artis", file: "nama-file.mp3", cover: "" },
 ];
 // Otomatis baca lagu dari repo GitHub (hanya jalan di alamat *.github.io, repo harus publik).
@@ -107,7 +120,7 @@ var GITHUB = { user: "", repo: "", folder: "" }; // kosongkan = ambil otomatis d
 var $=function(s){return document.querySelector(s)},L=LAGU,N=L.length,au=$('#au'),i=0,sh=0,rp=0,hist=[],dur={};
 var S={};try{S=JSON.parse(localStorage.getItem('stelmusik')||'{}')}catch(_){}
 var RP=['<path d="M7 7h10v3l4-4-4-4v3H5v6h2zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2z"/>','<path d="M7 7h10v3l4-4-4-4v3H5v6h2zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2zm-5-5.5V9.5h-1v-1h2v3z"/>'];
-var bass=S.b||0,ctx,fx,rid=0,bUrl,bt,busy=0;
+var saved={},bass=S.b||0,ctx,fx,rid=0,bUrl,bt,busy=0;
 var IOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 var OC=window.OfflineAudioContext||window.webkitOfflineAudioContext;
 function bassOK(){return location.protocol!=='file:'&&(IOS?!!OC:!!(window.AudioContext||window.webkitAudioContext))}
@@ -118,13 +131,18 @@ for(k=0;k<c;k++)d.push(b.getChannelData(k));
 for(j=0;j<n;j++)for(k=0;k<c;k++){x=Math.max(-1,Math.min(1,d[k][j]));v.setInt16(o,x<0?x*32768:x*32767,true);o+=2}
 return new Blob([ab],{type:'audio/wav'})}
 // iOS: realtime Web Audio mematikan lagu saat layar dikunci, jadi bass diproses dulu (offline) lalu diputar sebagai audio biasa.
+function renderBlob(k,lvl){return fetch(L[k].file).then(function(r){return r.arrayBuffer()}).then(function(ab){return new Promise(function(ok,no){var p=new OC(2,1,44100).decodeAudioData(ab,ok,no);if(p&&p.catch)p.catch(no)})}).then(function(dec){return new Promise(function(ok,no){var o=new OC(2,dec.length,44100),s=o.createBufferSource();s.buffer=dec;chain(o,s,o.destination,lvl/100);s.start(0);o.oncomplete=function(e){ok(e.renderedBuffer)};var p=o.startRendering();if(p&&p.then)p.then(ok,no)})}).then(function(out){return URL.createObjectURL(wav(out))})}
 function renderSrc(k,play,t0){var id=++rid;busy=1;$('#st').textContent='Memproses bass…';
-fetch(L[k].file).then(function(r){return r.arrayBuffer()}).then(function(ab){return new Promise(function(ok,no){var p=new OC(2,1,44100).decodeAudioData(ab,ok,no);if(p&&p.catch)p.catch(no)})}).then(function(dec){if(id!==rid)return;
-return new Promise(function(ok,no){var o=new OC(2,dec.length,44100),s=o.createBufferSource();s.buffer=dec;chain(o,s,o.destination,bass/100);s.start(0);o.oncomplete=function(e){ok(e.renderedBuffer)};var p=o.startRendering();if(p&&p.then)p.then(ok,no)})}).then(function(out){if(!out||id!==rid)return;
-var u=URL.createObjectURL(wav(out));if(bUrl)URL.revokeObjectURL(bUrl);bUrl=u;au.src=u;
+renderBlob(k,bass).then(function(u){if(id!==rid){URL.revokeObjectURL(u);return}if(bUrl)URL.revokeObjectURL(bUrl);bUrl=u;au.src=u;
 if(t0){au.addEventListener('loadedmetadata',function f(){au.removeEventListener('loadedmetadata',f);try{au.currentTime=t0}catch(_){}})}
 busy=0;if(play)au.play().catch(function(){$('#st').textContent='Ketuk putar untuk mulai'});else $('#st').textContent='Siap diputar'}).catch(function(){if(id!==rid)return;busy=0;au.src=L[k].file;$('#st').textContent='Bass gagal diproses, memutar tanpa bass';if(play)au.play().catch(function(){})})}
-function iosBass(){clearTimeout(bt);bt=setTimeout(function(){var t=au.currentTime||0,pl=!au.paused;rid++;if(bass>0){au.pause();renderSrc(i,pl,t)}else{busy=0;au.src=L[i].file;if(t)au.addEventListener('loadedmetadata',function f(){au.removeEventListener('loadedmetadata',f);try{au.currentTime=t}catch(_){}});if(pl)au.play().catch(function(){})}},500)}
+// Siapkan lagu berikutnya selagi lagu sekarang diputar, supaya pindah lagu langsung jalan walau layar mati (iOS)
+var pend=null,cK=null,cU=null,pK=null,wK=null;
+function peek(){if(pend==null){if(sh&&N>1){do{pend=Math.floor(Math.random()*N)}while(pend===i)}else pend=(i+1)%N}return pend}
+function prefetch(){if(!IOS||!N||rp===2||!(rp===1||i<N-1||sh))return;var k=peek();
+if(bass>0){var key=k+'_'+bass;if(cK===key||pK===key)return;pK=key;renderBlob(k,bass).then(function(u){if(pK!==key){URL.revokeObjectURL(u);return}if(cU)URL.revokeObjectURL(cU);cU=u;cK=key;pK=null}).catch(function(){pK=null})}
+else if(wK!==k){wK=k;fetch(L[k].file).then(function(r){return r.blob()}).catch(function(){})}}
+function iosBass(){clearTimeout(bt);if(cU){URL.revokeObjectURL(cU)}cU=cK=pK=null;bt=setTimeout(function(){var t=au.currentTime||0,pl=!au.paused;rid++;if(bass>0){au.pause();renderSrc(i,pl,t)}else{busy=0;au.src=L[i].file;if(t)au.addEventListener('loadedmetadata',function f(){au.removeEventListener('loadedmetadata',f);try{au.currentTime=t}catch(_){}});if(pl)au.play().catch(function(){})}},500)}
 function save(){try{localStorage.setItem('stelmusik',JSON.stringify({i:i,sh:sh,rp:rp,b:bass}))}catch(_){}}
 // Bass boost (Web Audio). Dibuat hanya saat dipakai supaya pemutaran biasa tetap aman.
 function fxOK(){return!IOS&&(window.AudioContext||window.webkitAudioContext)&&location.protocol!=='file:'}
@@ -148,26 +166,26 @@ function place(){var w=cv.clientWidth,s=Math.min(w*.3,230)*.95;cds.forEach(funct
 addEventListener('resize',place);
 var pl=$('#pl');
 function list(q){q=(q||'').toLowerCase();pl.innerHTML='';var n=0;L.forEach(function(l,k){if(q&&(l.judul+' '+l.artis).toLowerCase().indexOf(q)<0)return;n++;
-var b=document.createElement('button');b.className='it'+(k===i?' on':'');b.dataset.k=k;
+var b=document.createElement('button');b.className='it'+(k===i?' on':'')+(!navigator.onLine&&!saved[ab(l.file)]?' nf':'');b.dataset.k=k;
 b.innerHTML='<span class="n"></span><span class="eq"><s></s><s></s><s></s></span>';b.firstChild.textContent=k+1;
 b.appendChild(cover(l));var t=document.createElement('span');t.innerHTML='<b></b><small></small>';t.firstChild.textContent=l.judul;t.lastChild.textContent=l.artis;b.appendChild(t);
-var d=document.createElement('span');d.className='d';d.textContent=dur[k]?fmt(dur[k]):'';b.appendChild(d);
+var d=document.createElement('span');d.className='d';d.textContent=dtxt(k);b.appendChild(d);
 b.onclick=function(){k===i?toggle():load(k,true)};pl.appendChild(b)});
 if(!n){pl.innerHTML='<p class="kosong">'+(N?'Lagu tidak ditemukan.':'Belum ada lagu. Isi daftar LAGU di index.html.')+'</p>'}}
 $('#q').oninput=function(){list(this.value)};
-function load(k,play){i=(k+N)%N;var l=L[i];rid++;busy=0;if(IOS&&bass>0){au.pause();au.removeAttribute('src')}else au.src=l.file;$('#jd').textContent=l.judul;$('#ar').textContent=l.artis;document.title=l.judul+' · '+l.artis;prog();place();
+function load(k,play){i=(k+N)%N;var l=L[i];rid++;busy=0;pend=null;var hit=IOS&&bass>0&&cK===i+'_'+bass;if(hit){var cu=cU;cU=cK=null;if(bUrl)URL.revokeObjectURL(bUrl);bUrl=cu;au.src=cu}else if(IOS&&bass>0){au.pause();au.removeAttribute('src')}else au.src=l.file;$('#jd').textContent=l.judul;$('#ar').textContent=l.artis;document.title=l.judul+' · '+l.artis;prog();place();
 document.querySelectorAll('.it').forEach(function(b){b.classList.toggle('on',+b.dataset.k===i)});save();
 if('mediaSession'in navigator){navigator.mediaSession.metadata=new MediaMetadata({title:l.judul,artist:l.artis,artwork:l.cover?[{src:l.cover}]:[]})}
-if(IOS&&bass>0)renderSrc(i,play,0);else if(play)au.play().catch(function(){$('#st').textContent='Ketuk putar untuk mulai'})}
+if(hit){if(play)au.play().catch(function(){$('#st').textContent='Ketuk putar untuk mulai'})}else if(IOS&&bass>0)renderSrc(i,play,0);else if(play)au.play().catch(function(){$('#st').textContent='Ketuk putar untuk mulai'})}
 function toggle(){if(!N||busy)return;if(!au.src)load(i,true);else au.paused?au.play().catch(function(){}):au.pause()}
-function next(){if(!N)return;hist.push(i);var k=i+1;if(sh&&N>1){do{k=Math.floor(Math.random()*N)}while(k===i)}load(k,true)}
+function next(){if(!N)return;hist.push(i);var k=peek();pend=null;load(k,true)}
 function prev(){if(!N)return;if(au.currentTime>3){au.currentTime=0;return}load(hist.length?hist.pop():i-1,true)}
 function prog(){var d=au.duration||0,t=au.currentTime||0,p=d?t/d*1000:0;$('#sk').value=p;$('#sk').style.setProperty('--p',(p/10)+'%');$('#t0').textContent=fmt(t);$('#t1').textContent=fmt(d)}
-au.ontimeupdate=prog;au.onloadedmetadata=function(){dur[i]=au.duration;prog();var d=document.querySelector('.it[data-k="'+i+'"] .d');if(d)d.textContent=fmt(au.duration)};
-au.onplay=function(){$('#ppi').innerHTML='<path d="M6 5h4v14H6zm8 0h4v14h-4z"/>';$('#pp').setAttribute('aria-label','Jeda');document.body.classList.add('pl-on');$('#st').textContent='Sedang diputar';if('mediaSession'in navigator)navigator.mediaSession.playbackState='playing'};
+au.ontimeupdate=prog;au.onloadedmetadata=function(){dur[i]=au.duration;prog();var d=document.querySelector('.it[data-k="'+i+'"] .d');if(d)d.textContent=dtxt(i)};
+au.onplay=function(){$('#ppi').innerHTML='<path d="M6 5h4v14H6zm8 0h4v14h-4z"/>';$('#pp').setAttribute('aria-label','Jeda');document.body.classList.add('pl-on');setTimeout(prefetch,1500);$('#st').textContent='Sedang diputar';if('mediaSession'in navigator)navigator.mediaSession.playbackState='playing'};
 au.onpause=function(){$('#ppi').innerHTML='<path d="M8 5v14l11-7z"/>';$('#pp').setAttribute('aria-label','Putar');document.body.classList.remove('pl-on');if(!busy)$('#st').textContent='Dijeda';if('mediaSession'in navigator)navigator.mediaSession.playbackState='paused'};
 au.onended=function(){if(rp===2){au.currentTime=0;au.play()}else if(rp===1||i<N-1||sh)next();else{au.currentTime=0;$('#st').textContent='Selesai'}};
-au.onerror=function(){if(busy)return;if(bUrl&&au.getAttribute('src')===bUrl){var t=au.currentTime||0;bass=0;bassUI();save();au.src=L[i].file;$('#st').textContent='Perangkat ini gagal memutar bass, kembali ke suara asli';au.play().catch(function(){});return}if(au.getAttribute('src'))$('#st').textContent='File lagu tidak ditemukan'};
+au.onerror=function(){if(busy)return;if(bUrl&&au.getAttribute('src')===bUrl){var t=au.currentTime||0;bass=0;bassUI();save();au.src=L[i].file;$('#st').textContent='Perangkat ini gagal memutar bass, kembali ke suara asli';au.play().catch(function(){});return}if(au.getAttribute('src'))$('#st').textContent=navigator.onLine?'File lagu tidak ditemukan':'Lagu ini belum disimpan untuk offline'};
 $('#sk').oninput=function(){if(au.duration)au.currentTime=this.value/1000*au.duration;this.style.setProperty('--p',(this.value/10)+'%')};
 $('#pp').onclick=toggle;$('#nx').onclick=next;$('#pv').onclick=prev;
 $('#sh').onclick=function(){sh=sh?0:1;this.setAttribute('aria-pressed',!!sh);save()};
@@ -185,12 +203,28 @@ document.querySelectorAll('#bp .ch').forEach(function(b){b.onclick=function(){se
 bassUI();
 sh=S.sh?1:0;rp=S.rp||0;$('#sh').setAttribute('aria-pressed',!!sh);rpUI();
 list();if(N)load(S.i<N?S.i||0:0,false);else{$('#jd').textContent='Belum ada lagu';$('#ar').textContent='Isi daftar LAGU di index.html'}
-function addSongs(a){if(!a.length)return;var had=N;a.forEach(function(l){L.push(l);var k=L.length-1,d=cover(l);d.onclick=function(){k===i?toggle():load(k,true)};cv.appendChild(d);cds.push(d)});N=L.length;$('#cnt').textContent=N+' lagu';list($('#q').value);if(!had)load(0,false);else place()}
+var CN='musik-lagu',HAS='caches'in window&&'serviceWorker'in navigator&&/^https?:$/.test(location.protocol),saving=0;
+function ab(f){try{return new URL(f,location.href).href}catch(_){return f}}
+function dtxt(k){return(saved[ab(L[k].file)]?'✓ ':'')+(dur[k]?fmt(dur[k]):'')}
+function ofUI(m){var n=0;L.forEach(function(l){if(saved[ab(l.file)])n++});$('#on').textContent=n+'/'+N;if(m)$('#om').textContent=m}
+function refreshSaved(){if(!HAS)return;caches.open(CN).then(function(c){return c.keys()}).then(function(ks){saved={};ks.forEach(function(q){saved[q.url]=1});list($('#q').value);ofUI()}).catch(function(){})}
+function saveAll(){if(!HAS||saving)return;var todo=L.filter(function(l){return!saved[ab(l.file)]});if(!todo.length){ofUI('Semua lagu sudah tersimpan.');return}
+saving=1;$('#oa').disabled=true;try{navigator.storage.persist()}catch(_){}
+caches.open(CN).then(function(c){var n=0,fail=0;function step(){if(n>=todo.length){saving=0;$('#oa').disabled=false;$('#op').style.width='100%';refreshSaved();ofUI(fail?fail+' lagu gagal disimpan (cek koneksi atau ruang penyimpanan).':'Selesai! Lagu bisa diputar tanpa internet.');return}
+var l=todo[n];ofUI('Menyimpan '+(n+1)+'/'+todo.length+': '+l.judul);$('#op').style.width=(n/todo.length*100)+'%';
+fetch(l.file).then(function(q){if(!q.ok)throw 0;return c.put(ab(l.file),q)}).catch(function(){fail++}).then(function(){n++;step()})}step()}).catch(function(){saving=0;$('#oa').disabled=false;ofUI('Gagal membuka penyimpanan.')})}
+function net(){$('#cnt').textContent=N+' lagu'+(navigator.onLine?'':' · offline');list($('#q').value)}
+addEventListener('online',net);addEventListener('offline',net);
+if(HAS){navigator.serviceWorker.register('sw.js').catch(function(){});refreshSaved();$('#oa').onclick=saveAll;$('#od').onclick=function(){if(!saving)caches.delete(CN).then(function(){$('#op').style.width='0';refreshSaved();ofUI('Unduhan dihapus.')})}}
+else{$('#oa').disabled=$('#od').disabled=true;$('#om').textContent=location.protocol==='file:'?'Mode offline aktif setelah dibuka lewat github.io (bukan dari file lokal).':'Browser ini tidak mendukung mode offline.'}
+ofUI();net();
+function addSongs(a){if(!a.length)return;var had=N;a.forEach(function(l){L.push(l);var k=L.length-1,d=cover(l);d.onclick=function(){k===i?toggle():load(k,true)};cv.appendChild(d);cds.push(d)});N=L.length;$('#cnt').textContent=N+' lagu';list($('#q').value);if(!had)load(0,false);else place();ofUI();refreshSaved()}
 function ghInfo(){var m=location.hostname.match(/^(.+)\.github\.io$/);if(!m)return null;var u=GITHUB.user||m[1],seg=location.pathname.split('/').filter(Boolean),root=!GITHUB.repo&&(!seg.length||/\.html?$/.test(seg[0])),repo=GITHUB.repo||(root?u+'.github.io':seg[0]),rest=seg.slice(root?0:1);if(rest.length&&/\./.test(rest[rest.length-1]))rest.pop();return{u:u,r:repo,f:(GITHUB.folder!==''?GITHUB.folder.replace(/^\/|\/$/g,''):rest.join('/'))}}
 function parse(files){var A=/\.(mp3|m4a|aac|wav)$/i,I=/\.(jpe?g|png|webp)$/i,img={},have={};L.forEach(function(l){have[decodeURIComponent(l.file).split('/').pop().toLowerCase()]=1});
 files.forEach(function(f){if(f.type==='file'&&I.test(f.name))img[f.name.replace(I,'').toLowerCase()]=f.name});
-return files.filter(function(f){return f.type==='file'&&A.test(f.name)&&!have[f.name.toLowerCase()]}).map(function(f){var b=f.name.replace(A,''),n=b.replace(/_/g,' '),p=n.split(' - '),c=img[b.toLowerCase()];return{judul:(p.length>1?p.slice(1).join(' - '):n).trim(),artis:p.length>1?p[0].trim():'Tanpa artis',file:encodeURI(f.name),cover:c?encodeURI(c):''}})}
-if(AUTO){var g=ghInfo();if(g){var K='stelmusik_gh',url='https://api.github.com/repos/'+g.u+'/'+g.r+'/contents/'+g.f,c=null;try{c=JSON.parse(sessionStorage.getItem(K)||'null')}catch(_){}
-if(c&&c.u===url&&Date.now()-c.t<12e4)addSongs(parse(c.d));else fetch(url).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){try{sessionStorage.setItem(K,JSON.stringify({u:url,t:Date.now(),d:d}))}catch(_){}addSongs(parse(d))}).catch(function(){if(c&&c.u===url)addSongs(parse(c.d))})}}
+function tidy(x){x=x.replace(/[\(\[][^\)\]]*[\)\]]/g,'').replace(/[-_ ]*128[-_ ]*ytshorts/ig,'').replace(/\.?savetube\.me/ig,'').replace(/ytshorts/ig,'');var J={official:1,music:1,video:1,lyric:1,lyrics:1,visualizer:1,audio:1,hd:1,mv:1,'128':1,kbps:1};var w=x.split(/[-_\s.]+/).filter(function(t){return t&&!J[t.toLowerCase()]});return w.map(function(t){return t.charAt(0).toUpperCase()+t.slice(1)}).join(' ')||x}
+return files.filter(function(f){return f.type==='file'&&A.test(f.name)&&!have[f.name.toLowerCase()]}).map(function(f){var b=f.name.replace(A,''),p=b.replace(/_/g,' ').split(' - '),c=img[b.toLowerCase()];return{judul:p.length>1?tidy(p.slice(1).join(' - ')):tidy(b),artis:p.length>1?tidy(p[0]):'Tanpa artis',file:encodeURI(f.name),cover:c?encodeURI(c):''}})}
+if(AUTO){var g=ghInfo();if(g){var K='stelmusik_gh',url='https://api.github.com/repos/'+g.u+'/'+g.r+'/contents/'+g.f,c=null;try{c=JSON.parse(localStorage.getItem(K)||'null')}catch(_){}
+if(c&&c.u===url&&Date.now()-c.t<12e4)addSongs(parse(c.d));else fetch(url).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){try{localStorage.setItem(K,JSON.stringify({u:url,t:Date.now(),d:d}))}catch(_){}addSongs(parse(d))}).catch(function(){if(c&&c.u===url)addSongs(parse(c.d))})}}
 })();
 </script></body></html>
